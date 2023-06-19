@@ -1,7 +1,7 @@
 import graphics.MyGraphic;
 import logic.Board;
 
-public class S28232Project04 {
+public class Main {
     public static void main(String[] args) {
         MyGraphic g = new MyGraphic();
         Board b = new Board();
