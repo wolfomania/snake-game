@@ -71,7 +71,7 @@ public class Board extends AbstractTableModel implements DirectionChangeListener
         }
         if(Math.abs(direction - evt.getDirection()) != 2) {
             direction = evt.getDirection();
-            System.out.println("Direction changed to:" + direction);
+//            System.out.println("Direction changed to:" + direction);
         }
     }
 
