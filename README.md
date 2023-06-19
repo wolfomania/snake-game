@@ -35,3 +35,4 @@ Additionally, after the game ends, display a list of the top 10 players along wi
 * 4 bytes describing the number of points obtained.
   
 The read and write operations should be implemented based on the FileInputStream or FileOutputStream stream without encapsulating it in any other class.
+![img.png](img.png)
