@@ -273,7 +273,11 @@ public class MyGraphic implements ScoreChangeListener, EndGameListener {
             int nameLength = playerName.length();
             fos.write(nameLength);
 
-            fos.write(playerName.getBytes());
+            //write 2 bytes characters
+            for(char c : playerName.toCharArray()){
+                byte[] bytes = new byte[]{(byte)(c >> 8), (byte)c};
+                fos.write(bytes);
+            }
 
             fos.write((score >> 24) & 0xFF);
             fos.write((score >> 16) & 0xFF);
@@ -293,9 +297,15 @@ public class MyGraphic implements ScoreChangeListener, EndGameListener {
 
                 int nameLength = fis.read();
 
-                byte[] nameBytes = new byte[nameLength];
+                //Reading 2 bytes characters
+                byte[] nameBytes = new byte[nameLength * 2];
                 fis.read(nameBytes);
-                String playerName = new String(nameBytes);
+                char[] chars = new char[nameBytes.length / 2];
+                for (int i = 0, j = 0; i < nameBytes.length; i+=2, j++) {
+                    chars[j] = (char)((nameBytes[i] << 8) | (nameBytes[i + 1] & 0xff));
+                }
+
+                String playerName = new String(chars);
 
                 // Read the score as 4 bytes in big-endian order
                 int score = (fis.read() << 24) | (fis.read() << 16) | (fis.read() << 8) | fis.read();
