@@ -22,7 +22,7 @@ Snake is a simple but addictive game where the goal is to control a snake, colle
 ## 2. Project Description
 
 Implement your own version of the Snake game, following these assumptions:
-* The game board will be stored in a two-dimensional array of integers with a size of25×16.
+* The game board will be stored in a two-dimensional array of integers with a size of 25×16.
 * The actual gameplay will happen in a separate thread independent of the user interface thread.
 * The snake’s movement direction will be controlled using the arrow keys on the keyboard.
 * All game elements, such as the game tick, food consumption, collision with walls or own segment, will generate an event (NameOfEvent) that will be received by appropriate listeners.
