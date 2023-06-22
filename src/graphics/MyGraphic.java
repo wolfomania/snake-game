@@ -12,13 +12,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class MyGraphic implements ScoreChangeListener, EndGameListener {
+public class MyGraphic implements ScoreChangeListener, GameOverListener {
 
     private AbstractTableModel board;
 
-    private DirectionChangeListener listener;
+    private DirectionChangeListener directionChangeListener;
 
     private DifficultySetterListener difficultySetterListener;
+
+    private GameRestartListener gameRestartListener;
 
     private JPanel upper;
 
@@ -33,6 +35,8 @@ public class MyGraphic implements ScoreChangeListener, EndGameListener {
     private ArrayList<Player> playersRecords;
 
     private PlayerPanel playerPanel;
+
+    private ActionListener returnToMenuListener;
 
     public MyGraphic() {
         SwingUtilities.invokeLater(() -> {
@@ -68,6 +72,24 @@ public class MyGraphic implements ScoreChangeListener, EndGameListener {
             upper.add(logoPanel);
 
             playerPanel = new PlayerPanel(playersRecords);
+            returnToMenuListener = e1 -> {
+                jFrame.remove(playerPanel);
+                jFrame.setSize(1280, 720);
+                jFrame.add(menu);
+                jFrame.revalidate();
+                jFrame.repaint();
+            };
+            playerPanel.setActionOnExit(returnToMenuListener);
+
+            playerPanel.setActionOnRestart(e -> {
+                playerPanel.setMenuPanel();
+                fireRestartGame();
+                jFrame.remove(playerPanel);
+                jFrame.setSize(1280, 720);
+                jFrame.add(menu);
+                jFrame.revalidate();
+                jFrame.repaint();
+            });
 
             menu = new JPanel(new GridLayout(3,1,0,0));
 
@@ -88,13 +110,6 @@ public class MyGraphic implements ScoreChangeListener, EndGameListener {
                 jFrame.remove(menu);
                 jFrame.add(playerPanel);
                 jFrame.setSize(500, 400);
-                playerPanel.setActionL(e1 -> {
-                    jFrame.remove(playerPanel);
-                    jFrame.setSize(1280, 720);
-                    jFrame.add(menu);
-                    jFrame.revalidate();
-                    jFrame.repaint();
-                });
                 jFrame.revalidate();
                 jFrame.repaint();
             });
@@ -174,12 +189,17 @@ public class MyGraphic implements ScoreChangeListener, EndGameListener {
 
     public void init(Board board) {
         this.board = board;
-        this.listener = board;
+        this.directionChangeListener = board;
         this.difficultySetterListener = board;
+        this.gameRestartListener = board;
+    }
+
+    private void fireRestartGame(){
+        gameRestartListener.restartGame();
     }
 
     protected void fireDirectionChange(int direction) {
-        listener.changeDirection(new DirectionEvent(this, direction));
+        directionChangeListener.changeDirection(new DirectionEvent(this, direction));
     }
 
     private void addMenu(){
@@ -238,9 +258,9 @@ public class MyGraphic implements ScoreChangeListener, EndGameListener {
             appendPlayerScore(name, scorePanel.getScore(), "scores.txt");
         }
         jFrame.remove(jTable);
+        playerPanel.setEndGamePanel();
         jFrame.add(playerPanel);
         jFrame.setSize(500, 400);
-        playerPanel.setActionL(e1 -> System.exit(0));
         jFrame.revalidate();
         jFrame.repaint();
     }
@@ -323,4 +343,5 @@ public class MyGraphic implements ScoreChangeListener, EndGameListener {
     private void fireSetDifficultyEvent(int difficulty){
         difficultySetterListener.setDifficulty(new DifficultyEvent(this, difficulty));
     }
+
 }

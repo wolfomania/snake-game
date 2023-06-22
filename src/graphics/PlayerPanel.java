@@ -9,10 +9,13 @@ import java.util.Collections;
 public class PlayerPanel extends JPanel {
     private final ArrayList<Player> players;
 
-    JButton exitButton;
+    private final JPanel buttonPanel;
 
+    private final JButton exitButton;
 
-    public PlayerPanel(ArrayList<Player> records) {
+    private final JButton restartGameButton;
+
+    protected PlayerPanel(ArrayList<Player> records) {
         this.players = records;
 
         setLayout(new BorderLayout());
@@ -37,19 +40,42 @@ public class PlayerPanel extends JPanel {
 
         add(personDisplayPanel, BorderLayout.CENTER);
 
+        buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout());
+
         exitButton = new JButton("Exit");
 
+        restartGameButton = new JButton("Back to menu");
 
-        add(exitButton, BorderLayout.SOUTH);
+        buttonPanel.add(exitButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public int getMinimum(){
+    protected int getMinimum(){
 
         Collections.sort(players);
         int i = Math.min(players.size() - 1, 9);
         return i < 9 ? 0 : players.get(i).getScore();
     }
-    public void setActionL(ActionListener listener) {
+
+
+    protected void setActionOnExit(ActionListener listener) {
         exitButton.addActionListener(listener);
     }
+
+    protected void setActionOnRestart(ActionListener listener){
+        restartGameButton.addActionListener(listener);
+    }
+
+    protected void setEndGamePanel() {
+        buttonPanel.remove(exitButton);
+        buttonPanel.add(restartGameButton);
+    }
+
+    protected void setMenuPanel() {
+        buttonPanel.add(exitButton);
+        buttonPanel.remove(restartGameButton);
+    }
+
 }

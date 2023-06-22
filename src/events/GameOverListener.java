@@ -1,6 +1,6 @@
 package events;
 
-public interface EndGameListener {
+public interface GameOverListener {
 
     void endGame();
 }

@@ -7,15 +7,15 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.Random;
 
-public class Board extends AbstractTableModel implements DirectionChangeListener, DifficultySetterListener {
+public class Board extends AbstractTableModel implements DirectionChangeListener, DifficultySetterListener, GameRestartListener {
 
-    private final int[][] gameBoard;
+    private int[][] gameBoard;
 
     private ScoreChangeListener scoreChangeListener;
 
-    private EndGameListener endGameListener;
+    private GameOverListener gameOverListener;
 
-    private final Snake head;
+    private Snake head;
 
     private Snake tail;
 
@@ -26,9 +26,13 @@ public class Board extends AbstractTableModel implements DirectionChangeListener
 
     private int speed;
 
-    private final Thread game;
+    private Thread game;
 
     public Board() {
+        setDefaultGameProperties();
+    }
+
+    private void setDefaultGameProperties(){
         speed = 50;
         firstMove = true;
         score = 1;
@@ -71,64 +75,7 @@ public class Board extends AbstractTableModel implements DirectionChangeListener
         }
         if(Math.abs(direction - evt.getDirection()) != 2) {
             direction = evt.getDirection();
-//            System.out.println("Direction changed to:" + direction);
         }
-    }
-
-    private void moveIn(int direction) throws RuntimeException{
-        Square temp = head.getSquare();
-        switch (direction) {
-            case 0:
-                temp.moveTo(temp.getX() + 1, temp.getY());
-                break;
-            case 1:
-                temp.moveTo(temp.getX(), temp.getY() - 1);
-                break;
-            case 2:
-                temp.moveTo(temp.getX() - 1, temp.getY());
-                break;
-            case 3:
-                temp.moveTo(temp.getX(), temp.getY() + 1);
-                break;
-            default:
-                break;
-        }
-
-        if(gameBoard[temp.getX()][temp.getY()] == 3) {
-            Snake add = new Snake(tail.getSquare().getX(), tail.getSquare().getY(), tail.getPrevious(), tail);
-            tail.setPrevious(add);
-            score++;
-            addApple();
-            fireScoreChangeListener(score);
-        }
-
-        if(gameBoard[temp.getX()][temp.getY()] == 2) {
-            throw new RuntimeException();
-        }
-
-        gameBoard[temp.getX()][temp.getY()] = 1;
-
-        if(score == 1) {
-            gameBoard[tail.getSquare().getX()][tail.getSquare().getY()] = 0;
-            fireTableCellUpdated(tail.getSquare().getX(), tail.getSquare().getY());
-            tail.getSquare().moveTo(head.getSquare().getX(), head.getSquare().getY());
-        }
-    }
-
-    private void tailMoveTo() {
-
-        Snake tempSnake = new Snake(head.getSquare().getX(), head.getSquare().getY(), head, head.getNext());
-        head.getNext().setPrevious(tempSnake);
-        head.setNext(tempSnake);
-
-        gameBoard[tail.getSquare().getX()][tail.getSquare().getY()] = 0;
-
-        moveIn(direction);
-
-        gameBoard[tempSnake.getSquare().getX()][tempSnake.getSquare().getY()] = 2;
-
-        tail = tail.getPrevious();
-
     }
 
     @Override
@@ -151,6 +98,11 @@ public class Board extends AbstractTableModel implements DirectionChangeListener
         }
     }
 
+    @Override
+    public void restartGame() {
+        setDefaultGameProperties();
+    }
+
     private class Game implements Runnable {
 
         public Game() {
@@ -171,7 +123,7 @@ public class Board extends AbstractTableModel implements DirectionChangeListener
                 Square temp = new Square(tail.getSquare().getX(), tail.getSquare().getY());
 
                 if(score == 1)
-                    moveIn(direction);
+                    moveHeadIn(direction);
                 else tailMoveTo();
                 updateCells(temp);
 
@@ -184,24 +136,80 @@ public class Board extends AbstractTableModel implements DirectionChangeListener
 
         }
 
-    }
+        private void updateCells(Square last) {
 
-    private void holdThread(){
-        try {
-            Thread.sleep(speed);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            fireTableCellUpdated(head.getSquare().getX(), head.getSquare().getY());
+            fireTableCellUpdated(head.getNext().getSquare().getX(), head.getNext().getSquare().getY());
+            fireTableCellUpdated(last.getX(), last.getY());
         }
+
+        private void holdThread(){
+            try {
+                Thread.sleep(speed);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void moveHeadIn(int direction) throws RuntimeException{
+            Square temp = head.getSquare();
+            switch (direction) {
+                case 0:
+                    temp.moveTo(temp.getX() + 1, temp.getY());
+                    break;
+                case 1:
+                    temp.moveTo(temp.getX(), temp.getY() - 1);
+                    break;
+                case 2:
+                    temp.moveTo(temp.getX() - 1, temp.getY());
+                    break;
+                case 3:
+                    temp.moveTo(temp.getX(), temp.getY() + 1);
+                    break;
+                default:
+                    break;
+            }
+
+            if(gameBoard[temp.getX()][temp.getY()] == 3) {
+                Snake add = new Snake(tail.getSquare().getX(), tail.getSquare().getY(), tail.getPrevious(), tail);
+                tail.setPrevious(add);
+                score++;
+                addApple();
+                fireScoreChangeListener(score);
+            }
+
+            if(gameBoard[temp.getX()][temp.getY()] == 2) {
+                throw new RuntimeException();
+            }
+
+            gameBoard[temp.getX()][temp.getY()] = 1;
+
+            if(score == 1) {
+                gameBoard[tail.getSquare().getX()][tail.getSquare().getY()] = 0;
+                fireTableCellUpdated(tail.getSquare().getX(), tail.getSquare().getY());
+                tail.getSquare().moveTo(head.getSquare().getX(), head.getSquare().getY());
+            }
+        }
+        private void tailMoveTo() {
+
+            Snake tempSnake = new Snake(head.getSquare().getX(), head.getSquare().getY(), head, head.getNext());
+            head.getNext().setPrevious(tempSnake);
+            head.setNext(tempSnake);
+
+            gameBoard[tail.getSquare().getX()][tail.getSquare().getY()] = 0;
+
+            moveHeadIn(direction);
+
+            gameBoard[tempSnake.getSquare().getX()][tempSnake.getSquare().getY()] = 2;
+
+            tail = tail.getPrevious();
+
+        }
+
     }
 
     Random r = new Random();
 
-    private void updateCells(Square last) {
-
-        fireTableCellUpdated(head.getSquare().getX(), head.getSquare().getY());
-        fireTableCellUpdated(head.getNext().getSquare().getX(), head.getNext().getSquare().getY());
-        fireTableCellUpdated(last.getX(), last.getY());
-    }
     private void addApple() {
         int randomPosition = (r.nextInt(((25 * 16) - score + 1)));
         int x = 0;
@@ -225,7 +233,7 @@ public class Board extends AbstractTableModel implements DirectionChangeListener
 
     public void init(MyGraphic myGraphic) {
         this.scoreChangeListener = myGraphic;
-        this.endGameListener = myGraphic;
+        this.gameOverListener = myGraphic;
     }
 
     private void fireScoreChangeListener(int score){
@@ -233,6 +241,6 @@ public class Board extends AbstractTableModel implements DirectionChangeListener
     }
 
     private void fireGameOverEvent(){
-        endGameListener.endGame();
+        gameOverListener.endGame();
     }
 }
