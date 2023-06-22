@@ -43,7 +43,7 @@ public class MyGraphic implements ScoreChangeListener, GameOverListener {
 
             playersRecords = readPlayerScores("scores.txt");
             jFrame = new JFrame("Logic.Snake");
-            jFrame.setSize(1000, 720);
+            jFrame.setSize(950, 720);
             jFrame.setLayout(new BoxLayout(jFrame.getContentPane(), BoxLayout.Y_AXIS));
             jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             jFrame.setBackground(Color.BLACK);
@@ -74,7 +74,7 @@ public class MyGraphic implements ScoreChangeListener, GameOverListener {
             playerPanel = new PlayerPanel(playersRecords);
             returnToMenuListener = e1 -> {
                 jFrame.remove(playerPanel);
-                jFrame.setSize(1280, 720);
+                jFrame.setSize(950, 720);
                 jFrame.add(menu);
                 jFrame.revalidate();
                 jFrame.repaint();
@@ -85,7 +85,7 @@ public class MyGraphic implements ScoreChangeListener, GameOverListener {
                 playerPanel.setMenuPanel();
                 fireRestartGame();
                 jFrame.remove(playerPanel);
-                jFrame.setSize(1280, 720);
+                jFrame.setSize(950, 720);
                 jFrame.add(menu);
                 jFrame.revalidate();
                 jFrame.repaint();
